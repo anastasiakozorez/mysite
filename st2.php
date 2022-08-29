@@ -1,6 +1,36 @@
-<!doctype html>
 <?php
 session_start();
+print_r($_POST);
+$s=1;
+$mysql = new mysqli('localhost', 'root', '', 'lsite');
+if (isset($_SESSION['user']) and isset($_POST['text'])) {
+    $login = $_SESSION['user'];
+    $sql = "SELECT * FROM user WHERE login = '$login'";
+    $result = $mysql->query($sql);
+    $user = $result->fetch_assoc();
+
+    $username = $user['login'];
+    $email = $user['email'];
+    $text = $_POST['text'];
+} else if (!isset($_SESSION['user']) and isset($_POST['text']))
+{
+    $username = $_POST['username'];
+    $email = $_POST['email'];
+    $text = $_POST['text'];
+}
+
+if (isset($_POST['text'])) {
+    $sql = "INSERT INTO comment (`text`,`username`,`email`,`article_ID`) VALUES ('$text', '$username', '$email','$s')";
+    $a=$mysql->query($sql);
+    echo $a;
+    echo "string";
+    header('Location: /site/st2.php');
+}
+?>
+<?php
+$article_ID = 2;
+$sql_comments = "SELECT * FROM comment WHERE article_ID = '$article_ID'";
+$comments = $mysql->query($sql_comments)->fetch_all();
 ?>
 <html lang="en">
 <body>
@@ -93,23 +123,47 @@ session_start();
 <h6 style="display: inline-block;">ЭВРИБАДИ ГЕТ АП СИНГИН</h6>
 <h6>05.03.20</h6>
 <br>
+<div>
+<?php
+    if ($comments) {
+        foreach ($comments as $i => $comment) {
+            $username = $comment[2];
+            $email = $comment[3];
+            $text = $comment[1];
+
+            echo "<div class='card mt-2'>";
+            echo "<div class='card-header'>";
+            echo "Комментарий";
+            echo "</div>";
+            echo "<div class='card-body'>";
+            echo "<blockquote class='blockquote mb-0'>";
+            echo "<p>$username</p>";
+            echo "<footer class='blockquote-footer'>$text</footer>";
+            echo "</blockquote>";
+            echo "</div>";
+            echo "</div>";
+        }
+    }
+?>
+</div>
 <div class="mb-3">
-<?php if (!$_SESSION["user"]) { ?>
-  <label for="exampleFormControlInput1" class="form-label">имя</label>
-  <input type="email" class="form-control-lg" id="exampleFormControlInput1">
+<?php if (!isset($_SESSION["user"])) { ?> 
+ <label for="exampleFormControlInput1" class="form-label">имя</label>
+  <input type="username" class="form-control-lg" id="exampleFormControlInput1" name="username">
   <label for="exampleFormControlInput1" class="form-label">Email адрес</label>
-  <input type="email" class="form-control-lg" id="exampleFormControlInput1"><br>
+  <input type="email" class="form-control-lg" id="exampleFormControlInput1" name="email"><br>
 <?php  } ?>
 
-  <label for="exampleFormControlTextarea1" class="form-label">Текст комментария</label><br>
-  <textarea class="form-control-lg" id="exampleFormControlTextarea1" rows="3" style="width: 70%"></textarea><br>
-  <button>отправить</button>
+<label for="exampleFormControlTextarea1" class="form-label">Текст комментария</label><br>
+  <textarea class="form-control-lg" id="exampleFormControlTextarea1" rows="3" style="width: 70%" name="text"></textarea><br>
+  <button type="submit">отправить</button>
+  </form>
 </div>
     </div>
-    
   </div>
 </div>
-
+  </body>
+</html>
 
   </body>
 </html>
